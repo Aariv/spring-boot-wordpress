@@ -64,6 +64,14 @@ public class PostResource {
 	public String postRequestWithFiles(@RequestParam("doc") MultipartFile doc_file,
 			@RequestParam("img") MultipartFile img_file, @RequestParam("name") String name) {
 		String filename1 = null, filename2 = null, temp_name = name;
+		
+		try {
+			filename1 = fileStorageService.storeFile(doc_file);
+			filename2 = fileStorageService.storeFile(img_file);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		/********************* Post Request with files *************************/
 		MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
 		bodyMap.add("doc-file", doc_file);
@@ -80,12 +88,7 @@ public class PostResource {
 
 		/********************* Post Request with files *************************/
 
-		try {
-			filename1 = fileStorageService.storeFile(doc_file);
-			filename2 = fileStorageService.storeFile(img_file);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 		return filename1 + "," + filename2 + ", name: " + temp_name;
 	}
 

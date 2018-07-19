@@ -1,0 +1,34 @@
+Cassandra
+
+
+keyspace - database
+
+
+To Create Keyspace
+
+CREATE KEYSPACE demo WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 3};
+
+use demo;
+
+CREATE TABLE godatafy (name varchar PRIMARY KEY);
+
+select * from godatafy;
+
+insert into godatafy (name) values ('Ariv');
+
+
+exit
+
+data file direcoties.
+
+To take backup
+
+nodetool snapshot demo
+
+drop KEYSPACE demo
+
+To recover
+
+sudo apt install tree - To view 
+
+nodetool refresh demo godatafy - to recover
