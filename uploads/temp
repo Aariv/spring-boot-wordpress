@@ -1,0 +1,7 @@
+Jenkins
+username: admin
+password: admin
+localhost:8089
+
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'methodSecurityInterceptor' defined in class path resource [org/springframework/security/config/annotation/method/configuration/GlobalMethodSecurityConfiguration.class]: Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.aopalliance.intercept.MethodInterceptor]: Factory method 'methodSecurityInterceptor' threw exception; nested exception is java.lang.IllegalArgumentException: Expecting to only find a single bean for type interface org.springframework.security.authentication.AuthenticationManager, but found []
+
