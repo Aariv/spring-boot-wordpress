@@ -15,7 +15,7 @@ public class WordPress {
 
 	private String date;
 
-	private Guid guid;
+	private ContentDTO content;
 
 	/**
 	 * @return the id
@@ -63,20 +63,20 @@ public class WordPress {
 	}
 
 	/**
-	 * @return the guid
+	 * @return the content
 	 */
-	public Guid getGuid() {
-		return guid;
+	public ContentDTO getContent() {
+		return content;
 	}
 
 	/**
-	 * @param guid
-	 *            the guid to set
+	 * @param content the content to set
 	 */
-	public void setGuid(Guid guid) {
-		this.guid = guid;
+	public void setContent(ContentDTO content) {
+		this.content = content;
 	}
 
+	
 }
 
 class Guid {
@@ -98,3 +98,4 @@ class Guid {
 	}
 
 }
+
