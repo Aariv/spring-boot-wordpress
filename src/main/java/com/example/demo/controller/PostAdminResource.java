@@ -18,6 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.afrozaar.wordpress.wpapi.v2.Wordpress;
+import com.afrozaar.wordpress.wpapi.v2.exception.PostCreateException;
+import com.afrozaar.wordpress.wpapi.v2.model.Post;
+import com.afrozaar.wordpress.wpapi.v2.model.PostStatus;
+import com.afrozaar.wordpress.wpapi.v2.model.builder.ContentBuilder;
+import com.afrozaar.wordpress.wpapi.v2.model.builder.ExcerptBuilder;
+import com.afrozaar.wordpress.wpapi.v2.model.builder.PostBuilder;
+import com.afrozaar.wordpress.wpapi.v2.model.builder.TitleBuilder;
+import com.afrozaar.wordpress.wpapi.v2.util.ClientConfig;
+import com.afrozaar.wordpress.wpapi.v2.util.ClientFactory;
 import com.example.demo.domain.ContentDTO;
 import com.example.demo.domain.WordPress;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,7 +51,7 @@ public class PostAdminResource {
 	public JsonNode listPosts() {
 		try {
 			ResponseEntity<String> response
-			  = restTemplate.getForEntity("https://oxygenna.com/wp-json/wp/v2/posts?_embed", String.class);
+			  = restTemplate.getForEntity("http://192.168.43.44/wordpress/index.php/wp-json/wp/v2/posts", String.class);
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(response.getBody());
 			return root;
@@ -55,7 +65,26 @@ public class PostAdminResource {
 	
 	@PostMapping("/posts")
 	public WordPress addNewPost() {
-		String plainCreds = "admin:Admin@1";
+		// http://178.79.168.34:82/wp-json/jwt-auth/v1/token
+		
+		final Wordpress client = ClientFactory.fromConfig(ClientConfig.of("http://192.168.43.44/wordpress/index.php/wp-json/wp/v2/posts", "admin", "Admin@1", true));
+		
+		final Post post = PostBuilder.aPost()
+			    .withTitle(TitleBuilder.aTitle().withRendered("Ariv-Test").build())
+			    .withExcerpt(ExcerptBuilder.anExcerpt().withRendered("test").build())
+			    .withContent(ContentBuilder.aContent().withRendered("test").build())
+			    .build();
+
+			try {
+				final Post createdPost = client.createPost(post, PostStatus.publish);
+				System.out.println(createdPost.toString());
+			} catch (PostCreateException e) {
+				e.printStackTrace();
+			}
+			return null;
+
+		
+		/*String plainCreds = "admin:Admin@1";
 		byte[] plainCredsBytes = plainCreds.getBytes();
 		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
 		String base64Creds = new String(base64CredsBytes);
@@ -70,8 +99,8 @@ public class PostAdminResource {
 		wordPress.setContent(content);
 		
 		HttpEntity<String> request = new HttpEntity<String>(headers);
-		ResponseEntity<WordPress> response = restTemplate.exchange("http://localhost/wordpress/index.php/wp-json/wp/v2/posts", HttpMethod.POST, request, WordPress.class);
-		WordPress account = response.getBody();
-		return account;
+		ResponseEntity<WordPress> response = restTemplate.exchange("http://192.168.43.44/wordpress/index.php/wp-json/wp/v2/posts", HttpMethod.POST, request, WordPress.class);
+		WordPress account = response.getBody();*/
+		//return account;
 	}
 }
