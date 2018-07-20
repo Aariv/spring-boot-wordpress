@@ -1,4 +1,4 @@
-# spring-rest-template
+# spring-boot-wordpress
 Middle layer for any kind of external urls.
 
 #Build
