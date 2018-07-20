@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.example.demo.property;
+package com.example.demo.utils;
 
 /**
  * @author zentere
