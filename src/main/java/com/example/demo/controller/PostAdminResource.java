@@ -74,30 +74,6 @@ public class PostAdminResource {
 		title.setRendered("New Title from dev");
 		post.setTitle(title);
 		
-//		"author",
-//        "content",
-//        "status",
-//        "_links",
-//        "modified",
-//        "guid",
-//        "featured_media",
-//        "sticky",
-//        "password",
-//        "format",
-//        "link",
-//        "ping_status",
-//        "excerpt",
-//        "modified_gmt",
-//        "id",
-//        "title",
-//        "comment_status",
-//        "type",
-//        "slug",
-//        "date",
-//        "date_gmt",
-//        "categories",
-//        "tags"
-		
 		post.setType("post");
 		post.setPassword("uy");
 		post.setCommentStatus("closed");
@@ -105,18 +81,6 @@ public class PostAdminResource {
 		List<Long> categoryIds = new ArrayList<>();
 		post.setCategoryIds(categoryIds);
 		
-		
-		
-//		
-//		HashMap<String, Object> post = new HashMap<String, Object>();
-//		HashMap<String, Object> title = new HashMap<String, Object>();
-//		title.put("rendered", "New Title from dev");
-//		post.put("title", title);
-//		
-//		final ObjectMapper mapper = new ObjectMapper(); // jackson's objectmapper
-//
-//		final Post pojo = mapper.convertValue(post, Post.class);
-
 		try {
 			client.createPost(post, PostStatus.draft);
 		} catch (PostCreateException e) {
