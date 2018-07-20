@@ -3,35 +3,28 @@
  */
 package com.example.demo.controller;
 
-import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import com.afrozaar.wordpress.wpapi.v2.Wordpress;
+import com.afrozaar.wordpress.wpapi.v2.config.ClientConfig;
+import com.afrozaar.wordpress.wpapi.v2.config.ClientFactory;
 import com.afrozaar.wordpress.wpapi.v2.exception.PostCreateException;
+import com.afrozaar.wordpress.wpapi.v2.model.Content;
+import com.afrozaar.wordpress.wpapi.v2.model.Links;
 import com.afrozaar.wordpress.wpapi.v2.model.Post;
 import com.afrozaar.wordpress.wpapi.v2.model.PostStatus;
-import com.afrozaar.wordpress.wpapi.v2.model.builder.ContentBuilder;
-import com.afrozaar.wordpress.wpapi.v2.model.builder.ExcerptBuilder;
-import com.afrozaar.wordpress.wpapi.v2.model.builder.PostBuilder;
-import com.afrozaar.wordpress.wpapi.v2.model.builder.TitleBuilder;
-import com.afrozaar.wordpress.wpapi.v2.util.ClientConfig;
-import com.afrozaar.wordpress.wpapi.v2.util.ClientFactory;
-import com.example.demo.domain.ContentDTO;
+import com.afrozaar.wordpress.wpapi.v2.model.Self;
+import com.afrozaar.wordpress.wpapi.v2.model.Title;
+import com.afrozaar.wordpress.wpapi.v2.response.PagedResponse;
 import com.example.demo.domain.WordPress;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 /**
  * @author zentere
@@ -40,67 +33,95 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RestController
 @RequestMapping("/api/admin")
 public class PostAdminResource {
+	Wordpress client = null;
 
-	private RestTemplate restTemplate;
-	
-	public PostAdminResource(RestTemplateBuilder restTemplateBuilder) {
-		this.restTemplate = restTemplateBuilder.build();
+	public PostAdminResource() {
+		String baseUrl = "http://192.168.2.251/wordpress/index.php";
+		String username = "admin";
+		String password = "Admin@1";
+		boolean debug = true;
+		boolean permaLink = true;
+
+		client = ClientFactory.fromConfig(ClientConfig.of(baseUrl, username, password, permaLink, debug));
 	}
-	
+
 	@GetMapping(value = "/posts")
-	public JsonNode listPosts() {
+	public PagedResponse<Post> listPosts() {
+		PagedResponse<Post> response;
 		try {
-			ResponseEntity<String> response
-			  = restTemplate.getForEntity("http://192.168.43.44/wordpress/index.php/wp-json/wp/v2/posts", String.class);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(response.getBody());
-			return root;
-		} catch (RestClientException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			response = client.getPagedResponse(new URI("http://192.168.2.251/wordpress/index.php/wp-json/wp/v2"), Post.class);
+			return response;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	@PostMapping("/posts")
-	public WordPress addNewPost() {
-		// http://178.79.168.34:82/wp-json/jwt-auth/v1/token
+	public WordPress addNewPost() throws MismatchedInputException {
+		Post post = new Post();
+		post.setAuthor(1L);
+		Content content = new Content();
+		content.setRendered("This is the content of the post");
+		post.setContent(content);
+		post.setStatus("publish");
+		Links links = new Links();
+		List<Self> self = new ArrayList<Self>();
+		links.setSelf(self);
+		post.setLinks(links);
+		post.setModified("");
+		Title title = new Title();
+		title.setRendered("New Title from dev");
+		post.setTitle(title);
 		
-		final Wordpress client = ClientFactory.fromConfig(ClientConfig.of("http://192.168.43.44/wordpress/index.php/wp-json/wp/v2/posts", "admin", "Admin@1", true));
+//		"author",
+//        "content",
+//        "status",
+//        "_links",
+//        "modified",
+//        "guid",
+//        "featured_media",
+//        "sticky",
+//        "password",
+//        "format",
+//        "link",
+//        "ping_status",
+//        "excerpt",
+//        "modified_gmt",
+//        "id",
+//        "title",
+//        "comment_status",
+//        "type",
+//        "slug",
+//        "date",
+//        "date_gmt",
+//        "categories",
+//        "tags"
 		
-		final Post post = PostBuilder.aPost()
-			    .withTitle(TitleBuilder.aTitle().withRendered("Ariv-Test").build())
-			    .withExcerpt(ExcerptBuilder.anExcerpt().withRendered("test").build())
-			    .withContent(ContentBuilder.aContent().withRendered("test").build())
-			    .build();
+		post.setType("post");
+		post.setPassword("uy");
+		post.setCommentStatus("closed");
+		post.setPingStatus("closed");
+		List<Long> categoryIds = new ArrayList<>();
+		post.setCategoryIds(categoryIds);
+		
+		
+		
+//		
+//		HashMap<String, Object> post = new HashMap<String, Object>();
+//		HashMap<String, Object> title = new HashMap<String, Object>();
+//		title.put("rendered", "New Title from dev");
+//		post.put("title", title);
+//		
+//		final ObjectMapper mapper = new ObjectMapper(); // jackson's objectmapper
+//
+//		final Post pojo = mapper.convertValue(post, Post.class);
 
-			try {
-				final Post createdPost = client.createPost(post, PostStatus.publish);
-				System.out.println(createdPost.toString());
-			} catch (PostCreateException e) {
-				e.printStackTrace();
-			}
-			return null;
-
-		
-		/*String plainCreds = "admin:Admin@1";
-		byte[] plainCredsBytes = plainCreds.getBytes();
-		byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
-		String base64Creds = new String(base64CredsBytes);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Basic " + base64Creds);
-		
-		WordPress wordPress = new WordPress();
-		wordPress.setType("Dev-Test");
-		ContentDTO content = new ContentDTO();
-		content.setRendered("http://localhost/wordpress/wp-content/uploads/2018/07/1.png");
-		wordPress.setContent(content);
-		
-		HttpEntity<String> request = new HttpEntity<String>(headers);
-		ResponseEntity<WordPress> response = restTemplate.exchange("http://192.168.43.44/wordpress/index.php/wp-json/wp/v2/posts", HttpMethod.POST, request, WordPress.class);
-		WordPress account = response.getBody();*/
-		//return account;
+		try {
+			client.createPost(post, PostStatus.draft);
+		} catch (PostCreateException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
