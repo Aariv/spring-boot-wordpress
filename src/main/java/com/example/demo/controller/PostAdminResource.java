@@ -59,7 +59,7 @@ public class PostAdminResource {
 	@PostMapping(value = "/posts")
 	public Post addNewPost(@RequestBody Post post) throws MismatchedInputException {
 		try {
-			Post createdPost = client.createPost(post, PostStatus.draft);
+			Post createdPost = client.createPost(post, PostStatus.publish);
 			return createdPost;
 		} catch (PostCreateException e) {
 			e.printStackTrace();
