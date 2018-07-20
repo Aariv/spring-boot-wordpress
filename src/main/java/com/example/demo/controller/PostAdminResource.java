@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ import com.afrozaar.wordpress.wpapi.v2.model.PostStatus;
 import com.afrozaar.wordpress.wpapi.v2.model.Self;
 import com.afrozaar.wordpress.wpapi.v2.model.Title;
 import com.afrozaar.wordpress.wpapi.v2.response.PagedResponse;
-import com.example.demo.domain.WordPress;
+import com.example.demo.property.WordPressUtils;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 /**
@@ -33,23 +34,36 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 @RestController
 @RequestMapping("/api/admin")
 public class PostAdminResource {
-	Wordpress client = null;
+	
+	@Value("${wordpress.baseurl}")
+	private String baseURL;
+	
+	@Value("${wordpress.username}")
+	private String username;
+	
+	@Value("${wordpress.password}")
+	private String password;
+	
+	@Value("${wordpress.debug}")
+	private boolean debug;
+	
+	@Value("${wordpress.permlink}")
+	private boolean permaLink;
+	
+	@Value("${wordpress.posts.url}")
+	private String postsURL;
+	
+	private Wordpress client;
 
 	public PostAdminResource() {
-		String baseUrl = "http://192.168.2.251/wordpress/index.php";
-		String username = "admin";
-		String password = "Admin@1";
-		boolean debug = true;
-		boolean permaLink = true;
-
-		client = ClientFactory.fromConfig(ClientConfig.of(baseUrl, username, password, permaLink, debug));
+		this.client = ClientFactory.fromConfig(ClientConfig.of(WordPressUtils.BASE_URL, WordPressUtils.USERNAME, WordPressUtils.PASSWORD, WordPressUtils.permLink, WordPressUtils.debug));
 	}
 
 	@GetMapping(value = "/posts")
 	public PagedResponse<Post> listPosts() {
 		PagedResponse<Post> response;
 		try {
-			response = client.getPagedResponse(new URI("http://192.168.2.251/wordpress/index.php/wp-json/wp/v2"), Post.class);
+			response = client.getPagedResponse(new URI(postsURL), Post.class);
 			return response;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -58,7 +72,7 @@ public class PostAdminResource {
 	}
 
 	@PostMapping("/posts")
-	public WordPress addNewPost() throws MismatchedInputException {
+	public Post addNewPost() throws MismatchedInputException {
 		Post post = new Post();
 		post.setAuthor(1L);
 		Content content = new Content();
@@ -82,7 +96,8 @@ public class PostAdminResource {
 		post.setCategoryIds(categoryIds);
 		
 		try {
-			client.createPost(post, PostStatus.draft);
+			Post createdPost = client.createPost(post, PostStatus.draft);
+			return createdPost;
 		} catch (PostCreateException e) {
 			e.printStackTrace();
 		}

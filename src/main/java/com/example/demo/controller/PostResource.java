@@ -3,10 +3,10 @@
  */
 package com.example.demo.controller;
 
-import java.io.IOException;
+import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,13 +19,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.afrozaar.wordpress.wpapi.v2.Wordpress;
+import com.afrozaar.wordpress.wpapi.v2.config.ClientConfig;
+import com.afrozaar.wordpress.wpapi.v2.config.ClientFactory;
+import com.afrozaar.wordpress.wpapi.v2.model.Post;
+import com.afrozaar.wordpress.wpapi.v2.response.PagedResponse;
+import com.example.demo.property.WordPressUtils;
 import com.example.demo.service.FileStorageService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author zentere
@@ -35,26 +38,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RequestMapping("/api")
 public class PostResource {
 
-	private RestTemplate restTemplate;
+	@Value("${wordpress.baseurl}")
+	private String baseURL;
+	
+	@Value("${wordpress.username}")
+	private String username;
+	
+	@Value("${wordpress.password}")
+	private String password;
+	
+	@Value("${wordpress.debug}")
+	private boolean debug;
+	
+	@Value("${wordpress.permlink}")
+	private boolean permaLink;
+	
+	@Value("${wordpress.posts.url}")
+	private String postsURL;
+	
+	private final Wordpress client;
 
 	@Autowired
 	FileStorageService fileStorageService;
 
-	public PostResource(RestTemplateBuilder restTemplateBuilder) {
-		this.restTemplate = restTemplateBuilder.build();
+	public PostResource() {
+		this.client = ClientFactory.fromConfig(ClientConfig.of(WordPressUtils.BASE_URL, WordPressUtils.USERNAME, WordPressUtils.PASSWORD, WordPressUtils.permLink, WordPressUtils.debug));
 	}
 
 	@GetMapping(value = "/posts")
-	public JsonNode listPosts() {
+	public PagedResponse<Post> listPosts() {
+		
+		PagedResponse<Post> response;
 		try {
-			ResponseEntity<String> response = restTemplate
-					.getForEntity("https://oxygenna.com/wp-json/wp/v2/posts?_embed", String.class);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(response.getBody());
-			return root;
-		} catch (RestClientException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			response = client.getPagedResponse(new URI(postsURL), Post.class);
+			return response;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
