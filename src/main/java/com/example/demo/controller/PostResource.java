@@ -5,7 +5,6 @@ package com.example.demo.controller;
 
 import java.net.URI;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +14,6 @@ import com.afrozaar.wordpress.wpapi.v2.config.ClientConfig;
 import com.afrozaar.wordpress.wpapi.v2.config.ClientFactory;
 import com.afrozaar.wordpress.wpapi.v2.model.Post;
 import com.afrozaar.wordpress.wpapi.v2.response.PagedResponse;
-import com.example.demo.service.FileStorageService;
 import com.example.demo.utils.WordPressUtils;
 
 /**
@@ -27,9 +25,6 @@ import com.example.demo.utils.WordPressUtils;
 public class PostResource {
 
 	private final Wordpress client;
-
-	@Autowired
-	FileStorageService fileStorageService;
 
 	public PostResource() {
 		this.client = ClientFactory.fromConfig(ClientConfig.of(WordPressUtils.BASE_URL, WordPressUtils.USERNAME,
