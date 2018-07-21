@@ -66,6 +66,17 @@ public class PostAdminResource {
 		}
 		return post;
 	}
+	
+	@PostMapping(value = "/draftPosts")
+	public Post addNewPostWithDraft(@RequestBody Post post) throws MismatchedInputException {
+		try {
+			Post createdPost = client.createPost(post, PostStatus.draft);
+			return createdPost;
+		} catch (PostCreateException e) {
+			e.printStackTrace();
+		}
+		return post;
+	}
 
 	@PostMapping("/upload")
 	public List<String> postRequestWithFiles(@RequestParam("doc") MultipartFile[] doc_file) {
